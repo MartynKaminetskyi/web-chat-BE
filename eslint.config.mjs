@@ -1,35 +1,42 @@
-// @ts-check
-import eslint from '@eslint/js';
-import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import { defineConfig } from 'eslint-define-config';
 import globals from 'globals';
+import pluginJs from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import prettier from 'eslint-plugin-prettier';
 
-export default tseslint.config(
+/** @type {import('eslint').Linter.Config[]} */
+export default defineConfig([
   {
-    ignores: ['eslint.config.mjs'],
-  },
-  eslint.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
-  eslintPluginPrettierRecommended,
-  {
+    files: ['**/*.{js,mjs,cjs,ts}'],
+    ignores: ['dist', 'node_modules'],
     languageOptions: {
-      globals: {
-        ...globals.node,
-        ...globals.jest,
-      },
-      ecmaVersion: 5,
-      sourceType: 'module',
+      globals: globals.node,
+      parser: tseslint.parser,
       parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
+        project: './tsconfig.json',
       },
     },
-  },
-  {
+    plugins: {
+      prettier,
+      '@typescript-eslint': tseslint.plugin,
+    },
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-floating-promises': 'warn',
-      '@typescript-eslint/no-unsafe-argument': 'warn'
+      'no-console': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      semi: ['error', 'always'],
+      quotes: ['error', 'single'],
+      'no-trailing-spaces': 'error',
+      'prettier/prettier': [
+        'error',
+        {
+          singleQuote: true,
+          semi: true,
+          trailingComma: 'all',
+        },
+      ],
     },
   },
-);
+  pluginJs.configs.recommended,
+  ...tseslint.configs.recommended,
+]);
